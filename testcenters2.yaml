@@ -1,0 +1,1707 @@
+openapi: 3.0.0
+info:
+  description: API to support reservable item discovery and scheduling
+  version: 1.0.0
+  title: RSaaS Test Center API
+  contact:
+    email: scohen@psionline.com
+tags:
+  - name: Test Centers
+    description: Given a set of search criteria, return a list of test centers that can
+      fulfill the request.
+    externalDocs:
+      description: Find out more
+      url: http://localhost
+  - name: Test Center Reservations
+    description: Create a reservation, hold a slot pending a reservation, or cancel a
+      reservation
+    externalDocs:
+      description: Find out more
+      url: http://localhost
+  - name: Test Center Slot Holds
+    description: Create temporary holds on a reservation
+    externalDocs:
+      description: Find out more
+      url: http://localhost
+  - name: Test Center Admin
+    description: Administrative routes
+    externalDocs:
+      description: Find out more
+      url: http://localhost
+paths:
+  /testcenters:
+    post:
+      tags:
+        - Test Centers
+      summary: Find a test center query. Constraints (filters) are provided in the
+        request body to narrow the search to relevant test centers.
+      description: Return a list of test centers filtered by user selected filters
+      operationId: find-test-center
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterRequest"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "200":
+          description: Valid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterResponse"
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "408":
+          description: Took too long. Request timed out.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway timeout.  An upstream service did not respond in a timely
+            fashion "No resource available, unable to fulfill the request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+      security:
+        - api_key: []
+  "/testcenters/{testcenter_id}/slots/{tracking_id}":
+    get:
+      tags:
+        - Test Centers
+      summary: Find slots for a given test center and date range
+      description: Provide test center using it's identifier and the tracking_id to get the
+        available open slots during a defined date range.
+      operationId: find-test-center-slots
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: The test center identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: tracking_id
+          description: The tracking_id returned by a test center find query
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: begin
+          description: Optional start date (if different from original query)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: until
+          description: Optional end date (if different from original query)
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Valid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterSlotsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long. Request timed out.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway timeout.  An upstream service did not respond in a timely
+            fashion "No resource available, unable to fulfill the request."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/testcenters/{testcenter_id}/slots":
+    post:
+      tags:
+        - Test Centers
+      summary: (UCS2)  Find slots for a given test center and date range
+      description: Find the available time slots for a given test center during a defined
+        date range.
+      operationId: find-test-center-slots2
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: The test center identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterSlotsRequest"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "200":
+          description: Valid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterSlotsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/testcenters/{testcenter_id}/holdslot/{slot_id}":
+    post:
+      tags:
+        - Test Center Slot Holds
+      summary: (UCS2) Hold a slot temporarily pending a reservation
+      description: Place a temporary hold on a seat to reserve it before the hold
+        expires.  The "hold" time is configured on a system-wide basis or
+        organization level basis.
+      operationId: hold-test-center-reservation2
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: The test center identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: slot_id
+          description: slot identifier that maps to the begin date and exam duration minutes
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterReservationRequest3"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "201":
+          description: Hold request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterSlotHoldResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "416":
+          description: Unable to fulfill request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/416"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/testcenters/{testcenter_id}/hold/{tracking_id}":
+    post:
+      tags:
+        - Test Center Slot Holds
+      summary: Hold a slot pending a reservation
+      description: Place a temporary hold on a seat to reserve it before the hold expires.
+      operationId: hold-test-center-reservation
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: The test center identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: tracking_id
+          description: The tracking identifier for the request
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterSlotHoldRequest"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "201":
+          description: Hold request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterSlotHoldResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "416":
+          description: Unable to fulfill request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/416"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/hold/{reservation_hold_id}":
+    delete:
+      tags:
+        - Test Center Slot Holds
+      summary: Delete a pending slot reservation
+      description: Removes a reservation hold and releases the resource back to the system.
+      operationId: delete-reservation-hold
+      parameters:
+        - in: path
+          name: reservation_hold_id
+          description: The test center identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Hold request deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlotDeletionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/reservation/{reservation_hold_id}/confirm":
+    post:
+      tags:
+        - Test Center Slot Holds
+      summary: Convert a temporary slot hold into a reservation.
+      description: Confirm a reservation given an earlier temporary hold on a time slot
+      operationId: test-center-hold-to-reservation
+      parameters:
+        - in: path
+          name: reservation_hold_id
+          description: The reservation hold identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterSlotReservationRequest2"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "201":
+          description: Rservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterHold2ConfirmResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "416":
+          description: Unable to fulfill request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/416"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  /reservation:
+    post:
+      tags:
+        - Test Center Reservations
+      summary: Create a reservation
+      description: Create a reservation given a time slot
+      operationId: test-center-create-reservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterReservationRequest"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "201":
+          description: Rservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterReservationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "416":
+          description: Unable to fulfill request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/416"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  /reservation-request:
+    post:
+      tags:
+        - Test Center Reservations
+      summary: (UCS2) Create a reservation - provide full details
+      description: Create a reservation given a time slot
+      operationId: test-center-create-reservation2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCenterReservationRequest2"
+        description: Test center object containing query filters
+        required: true
+      responses:
+        "201":
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestCenterReservationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "408":
+          description: Took too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/408"
+        "416":
+          description: Unable to fulfill request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/416"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  "/reservation/{reservation_id}":
+    delete:
+      tags:
+        - Test Center Reservations
+      summary: Delete a reservation
+      description: Removes a reservation releases the resource back to the system
+      operationId: delete-reservation
+      parameters:
+        - in: path
+          name: reservation_id
+          description: Thereservation identifier for the selected test center
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Reservation deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteReservationResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/400"
+        "401":
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/401"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/404"
+        "429":
+          description: Too many requests.  Throttling applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/429"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/500"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/503"
+        "504":
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/504"
+  /admin:
+    post:
+      summary: Add test centers to system
+      description: Onboarding information to setup test centers as part of the scheduling
+        network
+      tags:
+        - Test Center Admin
+      responses:
+        "200":
+          description: OK
+    get:
+      summary: Return list of available test centers
+      description: Return a list of test centers and their underlying test center identifier
+      tags:
+        - Test Center Admin
+      responses:
+        "200":
+          description: OK
+  "/admin/{testcenter_id}":
+    get:
+      summary: Return a specific test center
+      description: Return a test centers given its underlying test center identifier
+      tags:
+        - Test Center Admin
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: test center identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Remove a specific test center from the system
+      description: Soft deletes a test center (makes it ineligible for querying)
+      tags:
+        - Test Center Admin
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: test center identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    patch:
+      summary: Update specific test center
+      description: Updates information related to a test center
+      tags:
+        - Test Center Admin
+      parameters:
+        - in: path
+          name: testcenter_id
+          description: test center identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+servers:
+  - url: http://petstore.swagger.io/v1
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  schemas:
+    "400":
+      description: Bad Request.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 400
+        message:
+          type: string
+          example: The request had invalid inputs or otherwise cannot be served.
+    "401":
+      description: Authorization information is missing or invalid.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 401
+        message:
+          type: string
+          example: Authorization information is missing or invalid.
+      required:
+        - code
+        - message
+    "404":
+      description: Record not found.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 404
+        message:
+          type: string
+          example: Unable to find requested record
+      required:
+        - code
+        - message
+    "408":
+      description: Request Timeout.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 408
+        message:
+          type: string
+          example: Request took too long to process.
+      required:
+        - code
+        - message
+    "416":
+      description: Unable to fulfill request.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 416
+        message:
+          type: string
+          example: No resource available, unable to fulfill the request.
+      required:
+        - code
+        - message
+    "429":
+      description: Too Many Requests.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 429
+        message:
+          type: string
+          example: Request rate too high, requests from this this user are throttled.
+      required:
+        - code
+        - message
+    "500":
+      description: Internal Server Error.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 500
+        message:
+          type: string
+          example: An error was encountered.
+      required:
+        - code
+        - message
+    "503":
+      description: Service  Unavailable.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 503
+        message:
+          type: string
+          example: The service is unavailable, please try again later.
+      required:
+        - code
+        - message
+    "504":
+      description: Gateway Timeout.
+      type: object
+      properties:
+        code:
+          type: number
+          example: 504
+        message:
+          type: string
+          example: The service timed out waiting for an upstream response.  Try again
+            later.
+      required:
+        - code
+        - message
+    TestCenterRequest:
+      type: object
+      required:
+        - item_type
+      properties:
+        item_type:
+          type: string
+          description: Reservable Resource Item Type
+          enum:
+            - test-center
+            - remote proctor
+        geolocation:
+          type: object
+          properties:
+            latitude_longitude:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: latitude
+                  example: "41.372686"
+                lng:
+                  type: number
+                  description: longitude
+                  example: "-452.653561"
+            ip_address:
+              type: string
+              description: the requestor's IP address.  This will be converted to a lat/lon
+                combination
+              example: 127.0.0.1
+            plus_code:
+              type: object
+              properties:
+                global_code:
+                  type: string
+                  example: 84QVG800+
+              description: PlusCode definition, converted to lat/lon combination
+            country:
+              type: string
+              description: ISO 3166 (ISO3166-1, ISO3166, Digit, Alpha-2 and Alpha-3 format)
+              example: US
+          minProperties: 1
+          description: target location.  Must include one of the options (lat/lon,
+            ip_address, plus_code or country)
+        date_range:
+          type: object
+          properties:
+            begin:
+              description: date to begin the search range
+              type: string
+              format: date-time
+            until:
+              type: string
+              format: date-time
+              description: last date in the search range
+            preferred_timezone:
+              type: object
+              properties:
+                tzname:
+                  type: string
+                  description: tz database naming convention
+                  example: America/Los_Angeles
+                utc_offset:
+                  type: string
+                  format: +/- 00:00
+                  example: -06:00  or +03:00
+        search_radius:
+          description: The area  in  KM or MI to include in the search
+          type: object
+          properties:
+            unit:
+              type: string
+              enum:
+                - KM
+                - Kilometers
+                - MI
+                - Miles
+              example: KM
+            radius:
+              type: number
+              example: 10
+        exam_info:
+          type: object
+          properties:
+            sponsor_organization:
+              type: string
+              description: The organization 'owning' the exam.  Not every exam is available
+                in every  test center, so the exam itself is a filter to find
+                test centers that are permitted to deliver the exam.
+              example: PSI
+            exam_portions:
+              type: object
+              description: support for multi-portion exams to aid in scheduling
+              properties:
+                exam_identifier:
+                  type: string
+                  example: asdf-123-asdff
+                portions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      portion_identifier:
+                        type: string
+                        description: the identifier for a specific test portion
+                        example: ASD-ZXC-ASD
+                      sequence_number:
+                        type: number
+                        description: each portion is number, beginning at 0
+                        example: 0
+                      duration_in_minutes:
+                        type: number
+                        description: the length of time in minutes that is allocated to the
+                          exam portion
+                        example: 60
+                      language:
+                        type: string
+                        description: preferred testing language in iso 639 format
+                        example: en
+        accomodations:
+          description: List of predefined, SEARCHABLE values that can be attributed to the
+            individual test centers
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: wheelchair accessible
+              mandatory:
+                type: boolean
+                description: qualifier on the accomodation, if true, results must include
+                  this accomodation, if false, then the accomodation is treated
+                  as desired, but optional
+                example: true
+        special_instructions:
+          type: string
+          description: Free form instructions for special needs.  If this field is not
+            blank, then the system will not be able to provide immediate
+            feedback, but rather delegate the request to human support agents to
+            manually fulfill the request.
+    TestCenterResponse:
+      type: object
+      properties:
+        tracking_id:
+          type: string
+          format: uuid
+          description: system generated tracking ID for the request
+        test_centers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Friendly name of the test center
+                example: PSI Training Center
+              testcenter_id:
+                type: string
+                description: test center identifier
+                example: 12341234a
+              information:
+                type: string
+                description: Free form text providing information about the site
+                example: Located near Bunker Hill and  the Mystic River
+              address:
+                type: array
+                items:
+                  type: string
+                  example: "56 Roland St #305"
+              city/town:
+                type: string
+                example: Charlestown
+              state/province:
+                type: string
+                example: Massachusetts
+              zip/postalcode:
+                type: string
+                format: postal
+                example: 2129
+              country:
+                type: string
+                example: United  States
+              image_url:
+                type: string
+                format: byte
+                example: jpeg photograph
+              geolocation:
+                type: object
+                properties:
+                  lat:
+                    type: number
+                    description: latitude
+                    example: "42.361145"
+                  lng:
+                    type: number
+                    description: longitude
+                    example: "-71.057083"
+                  distance:
+                    type: string
+                    example: 5.3 MI
+              testcenter_timezone_info:
+                type: object
+                properties:
+                  iana:
+                    type: string
+                    description: Iana tz database description format
+                    example: America/New_York
+                  standard_name:
+                    type: string
+                    description: Time zone abbreviation name
+                    example: Eastern Standard Time (EST)
+              facilities_available:
+                type: array
+                items:
+                  type: string
+                  description: list of amenities available at this site
+                  example: handicap accessible elevator, quiet room, snack center,
+                    charging station
+    TestCenterSlotsResponse:
+      properties:
+        utc_offset:
+          type: string
+          format: +/- 00:00
+          example: -06:00  or +03:00
+        available:
+          type: array
+          items:
+            type: object
+            properties:
+              exam_portion:
+                type: number
+                description: exam portion number for multi-part tests
+                example: 0
+              exam_identifer:
+                type: string
+                description: the
+                example: asdf-123-asdff
+              duration_in_minutes:
+                type: number
+                description: the length of time in minutes that is allocated to the exam
+                  portion
+                example: 60
+              slots:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    slot_id:
+                      type: string
+                      example: 1601220851-60
+                    begin:
+                      type: string
+                      format: date-time
+                    until:
+                      type: string
+                      format: date-time
+                    remaining_seats:
+                      type: number
+                      description: number of remaining seats that fulfill the exam duration
+                        requirement
+                      example: 3
+    TestCenterSlotHoldRequest:
+      required:
+        - slot_id
+        - request_id
+      type: object
+      properties:
+        slot_id:
+          type: string
+          description: slot identifier that maps to the begin date and exam duration minutes
+        request_id:
+          type: string
+          description: original request identifier
+        candidate_identifier:
+          type: string
+          description: The caller's unique identifier for the person
+          example: asdf-xcv-123-asdf
+    TestCenterSlotHoldResponse:
+      type: object
+      properties:
+        reservation_hold_id:
+          type: string
+          format: uuid
+        expiration:
+          type: string
+          format: date-time
+    SlotDeletionResponse:
+      type: object
+      properties:
+        reservation_hold_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+          example: removed
+    TestCenterSlotReservationRequest:
+      type: object
+      properties:
+        reservation_hold_id:
+          type: string
+          format: uuid
+          description: reservation hold identifier
+        request_id:
+          type: string
+          description: original request identifier
+        candidate_info:
+          $ref: "#/components/schemas/CandidateInfo"
+    TestCenterSlotReservationRequest2:
+      type: object
+      properties:
+        reservation_hold_id:
+          type: string
+          format: uuid
+          description: reservation hold identifier
+        candidate_info:
+          $ref: "#/components/schemas/CandidateInfo"
+    TestCenterHold2ConfirmResponse:
+      type: object
+      properties:
+        reservation_id:
+          type: string
+          format: uuid
+          description: reservation hold identifier
+    TestCenterReservationRequest:
+      type: object
+      properties:
+        slot_id:
+          type: string
+          description: slot identifier
+          example: 1601220851-60
+        request_id:
+          type: string
+          description: original request identifier
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        candidate_info:
+          $ref: "#/components/schemas/CandidateInfo"
+    TestCenterReservationResponse:
+      type: object
+      properties:
+        reservation_id:
+          type: string
+          format: uuid
+          description: reservation hold identifier
+    CandidateInfo:
+      type: object
+      properties:
+        candidate_identifier:
+          type: string
+          description: The caller's unique identifier for the person
+          example: asdf-1234-asdfs-xxx
+        family_name:
+          type: string
+          description: user's last name
+          example: Doe
+        given_name:
+          type: string
+          description: user's given name (first, middle -- all but family name)
+          example: John
+        contact_info:
+          type: object
+          properties:
+            email_address:
+              type: string
+              format: email
+              example: jdoe@somewhere.com
+            phone_number:
+              type: string
+              example: +1-541-754-3010
+    DeleteReservationResponse:
+      type: object
+      properties:
+        reservation_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+          example: removed
+    TestCenterSlotsRequest:
+      type: object
+      required:
+        - item_type
+      properties:
+        item_type:
+          type: string
+          description: Reservable Resource Item Type
+          enum:
+            - test-center
+            - remote proctor
+        geolocation:
+          type: object
+          properties:
+            latitude_longitude:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: latitude
+                  example: "41.372686"
+                lng:
+                  type: number
+                  description: longitude
+                  example: "-452.653561"
+            ip_address:
+              type: string
+              description: the requestor's IP address.  This will be converted to a lat/lon
+                combination
+              example: 127.0.0.1
+            plus_code:
+              type: object
+              properties:
+                global_code:
+                  type: string
+                  example: 84QVG800+
+              description: PlusCode definition, converted to lat/lon combination
+            country:
+              type: string
+              description: ISO 3166 (ISO3166-1, ISO3166, Digit, Alpha-2 and Alpha-3 format)
+              example: US
+          minProperties: 1
+          description: target location.  Must include one of the options (lat/lon,
+            ip_address, plus_code or country)
+        date_range:
+          type: object
+          properties:
+            begin:
+              description: date to begin the search range
+              type: string
+              format: date-time
+            until:
+              type: string
+              format: date-time
+              description: last date in the search range
+            preferred_timezone:
+              type: object
+              properties:
+                tzname:
+                  type: string
+                  description: tz database naming convention
+                  example: America/Los_Angeles
+                utc_offset:
+                  type: string
+                  format: +/- 00:00
+                  example: -06:00  or +03:00
+        search_radius:
+          description: The area  in  KM or MI to include in the search
+          type: object
+          properties:
+            unit:
+              type: string
+              enum:
+                - KM
+                - Kilometers
+                - MI
+                - Miles
+              example: KM
+            radius:
+              type: number
+              example: 10
+        exam_info:
+          type: object
+          properties:
+            sponsor_organization:
+              type: string
+              description: The organization 'owning' the exam.  Not every exam is available
+                in every  test center, so the exam itself is a filter to find
+                test centers that are permitted to deliver the exam.
+              example: PSI
+            exam_portions:
+              type: object
+              description: support for multi-portion exams to aid in scheduling
+              properties:
+                exam_identifier:
+                  type: string
+                  example: asdf-123-asdff
+                portions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      portion_identifier:
+                        type: string
+                        description: the identifier for a specific test portion
+                        example: ASD-ZXC-ASD
+                      sequence_number:
+                        type: number
+                        description: each portion is number, beginning at 0
+                        example: 0
+                      duration_in_minutes:
+                        type: number
+                        description: the length of time in minutes that is allocated to the
+                          exam portion
+                        example: 60
+                      language:
+                        type: string
+                        description: preferred testing language in iso 639 format
+                        example: en
+        accomodations:
+          description: List of predefined, SEARCHABLE values that can be attributed to the
+            individual test centers
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: wheelchair accessible
+              mandatory:
+                type: boolean
+                description: qualifier on the accomodation, if true, results must include
+                  this accomodation, if false, then the accomodation is treated
+                  as desired, but optional
+                example: true
+        special_instructions:
+          type: string
+          description: Free form instructions for special needs.  If this field is not
+            blank, then the system will not be able to provide immediate
+            feedback, but rather delegate the request to human support agents to
+            manually fulfill the request.
+    TestCenterReservationRequest2:
+      type: object
+      required:
+        - slot_id
+        - candidate_info
+        - item_type
+        - geolocation
+        - search_radius
+        - exam_info
+        - accomodations
+        - special_instructions
+      properties:
+        slot_id:
+          type: string
+          description: slot identifier
+          example: 1601220851-60
+        candidate_info:
+          $ref: "#/components/schemas/CandidateInfo"
+        item_type:
+          type: string
+          description: Reservable Resource Item Type
+          enum:
+            - test-center
+            - remote proctor
+        geolocation:
+          type: object
+          properties:
+            latitude_longitude:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  description: latitude
+                  example: "41.372686"
+                lng:
+                  type: number
+                  description: longitude
+                  example: "-452.653561"
+            ip_address:
+              type: string
+              description: the requestor's IP address.  This will be converted to a lat/lon
+                combination
+              example: 127.0.0.1
+            plus_code:
+              type: object
+              properties:
+                global_code:
+                  type: string
+                  example: 84QVG800+
+              description: PlusCode definition, converted to lat/lon combination
+            country:
+              type: string
+              description: ISO 3166 (ISO3166-1, ISO3166, Digit, Alpha-2 and Alpha-3 format)
+              example: US
+          minProperties: 1
+          description: target location.  Must include one of the options (lat/lon,
+            ip_address, plus_code or country)
+        search_radius:
+          description: The area  in  KM or MI to include in the search
+          type: object
+          properties:
+            unit:
+              type: string
+              enum:
+                - KM
+                - Kilometers
+                - MI
+                - Miles
+              example: KM
+            radius:
+              type: number
+              example: 10
+        exam_info:
+          type: object
+          properties:
+            sponsor_organization:
+              type: string
+              description: The organization 'owning' the exam.  Not every exam is available
+                in every  test center, so the exam itself is a filter to find
+                test centers that are permitted to deliver the exam.
+              example: PSI
+            exam_portions:
+              type: object
+              description: support for multi-portion exams to aid in scheduling
+              properties:
+                exam_identifier:
+                  type: string
+                  example: asdf-123-asdff
+                portions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      portion_identifier:
+                        type: string
+                        description: the identifier for a specific test portion
+                        example: ASD-ZXC-ASD
+                      sequence_number:
+                        type: number
+                        description: each portion is number, beginning at 0
+                        example: 0
+                      duration_in_minutes:
+                        type: number
+                        description: the length of time in minutes that is allocated to the
+                          exam portion
+                        example: 60
+                      language:
+                        type: string
+                        description: preferred testing language in iso 639 format
+                        example: en
+        accomodations:
+          description: List of predefined, SEARCHABLE values that can be attributed to the
+            individual test centers
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: wheelchair accessible
+              mandatory:
+                type: boolean
+                description: qualifier on the accomodation, if true, results must include
+                  this accomodation, if false, then the accomodation is treated
+                  as desired, but optional
+                example: true
+        special_instructions:
+          type: string
+          description: Free form instructions for special needs.  If this field is not
+            blank, then the system will not be able to provide immediate
+            feedback, but rather delegate the request to human support agents to
+            manually fulfill the request.
+    TestCenterReservationRequest3:
+      type: object
+      required:
+        - candidate_info
+        - exam_info
+        - accomodations
+        - special_instructions
+      properties:
+        candidate_info:
+          $ref: "#/components/schemas/CandidateInfo"
+        exam_info:
+          type: object
+          properties:
+            sponsor_organization:
+              type: string
+              description: The organization 'owning' the exam.  Not every exam is available
+                in every  test center, so the exam itself is a filter to find
+                test centers that are permitted to deliver the exam.
+              example: PSI
+            exam_portions:
+              type: object
+              description: support for multi-portion exams to aid in scheduling
+              properties:
+                exam_identifier:
+                  type: string
+                  example: asdf-123-asdff
+                portions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      portion_identifier:
+                        type: string
+                        description: the identifier for a specific test portion
+                        example: ASD-ZXC-ASD
+                      sequence_number:
+                        type: number
+                        description: each portion is number, beginning at 0
+                        example: 0
+                      duration_in_minutes:
+                        type: number
+                        description: the length of time in minutes that is allocated to the
+                          exam portion
+                        example: 60
+                      language:
+                        type: string
+                        description: preferred testing language in iso 639 format
+                        example: en
+        accomodations:
+          description: List of predefined, SEARCHABLE values that can be attributed to the
+            individual test centers
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: wheelchair accessible
+              mandatory:
+                type: boolean
+                description: qualifier on the accomodation, if true, results must include
+                  this accomodation, if false, then the accomodation is treated
+                  as desired, but optional
+                example: true
+        special_instructions:
+          type: string
+          description: Free form instructions for special needs.  If this field is not
+            blank, then the system will not be able to provide immediate
+            feedback, but rather delegate the request to human support agents to
+            manually fulfill the request.
