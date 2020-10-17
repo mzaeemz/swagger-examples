@@ -861,7 +861,7 @@ paths:
         "200":
           description: OK
 servers:
-  - url: http://localhost:8080/v1
+  - url: http://petstore.swagger.io/v1
 components:
   securitySchemes:
     api_key:
